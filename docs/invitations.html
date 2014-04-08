@@ -1,0 +1,373 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+
+  <title>Invitations</title>
+
+  <style type="text/css" media="screen,print">@import url("docs.css");</style>
+<META http-equiv=Content-Type content="text/html; charset=utf-8"></head>
+
+<body>
+<div><a name="top"></a></div>
+
+<div id="header">
+<table cellpadding="0" cellspacing="0" border="0" style="width:100%;"><tr>
+<td class="docheading" style="width:300px;"><h1 style="font-size: 18px; font-weight: bold;">intoEEtive.com</h1></td>
+<td class="searchbox">
+
+</td>
+</tr>
+</table>
+</div>
+
+
+<div id="navlinks">
+<a href="http://www.intoeetive.com/">intoEEtive.com</a> &gt;
+<a href="http://www.intoeetive.com/index.php/category/extending_ee">EE add-ons</a> &gt;
+<a href="http://www.intoeetive.com/index.php/comments/invitations">Invitations</a>
+</div>
+
+
+<div id="content">
+
+	<h1>Invitations</h1>
+
+	<p>Building closed community with ExpressionEngine has just become easier! Generate signup codes from CP, or let people generate them on frontend. View usage stats, associate users with people they invited, - and event let them earn credits for bringing referrals.</p>
+    
+   	<ul>		
+        
+        <li><a href="#general">General concepts</a></li>
+        <li><a href="#using">Using invitation</a>
+            <ul>
+            <li><a href="#using-signup">Using invitation during signup</a></li>
+            <li><a href="#tags-apply">Applying invitation by existing user</a></li>
+            </ul>
+        </li>
+        <li><a href="#cp">Control Panel</a>
+            <ul>
+            <li><a href="#cp-settings">Settings</a></li>
+            <li><a href="#cp-list">Invitations list</a></li>            
+            <li><a href="#cp-stats">Invite usage stats</a></li>
+            <li><a href="#cp-generate">Generating invitation code</a></li>
+            <li><a href="#cp-batch">Batch code generation</a></li>
+            </ul>
+        </li>
+        <li><a href="#tags">Template tags</a>
+            <ul>
+            <li><a href="#tags-generate">Generate invitation code</a></li>
+            <li><a href="#tags-display">Display invitations</a></li>
+            <li><a href="#tags-apply">Apply invitation (by existing user)</a></li>
+            <li><a href="#tags-referrals">Referrals</a></li>
+            <li><a href="#tags-referrer">Referrer</a></li>
+            </ul>
+        </li>
+        
+	</ul>
+
+	<h2><a name="basic" href="#top">&uarr;</a> General concepts</h2>
+
+<p>There are several potentional areas of use for invitations on your site:</p>
+<ul>
+<li>Build a closed community. Only people who have invitation code can sign up</li>
+<li>Advanced group management. People can move themseleves to membes group with special privileges by applying invitation code (when they sign up or afterwards)</li>
+<li>Build affiliate system. Let your users generate codes to invite others and track when they are used.</li>
+<li>Add bonus to user's account when code is used (both to the one who generated and who uses code). This feature requires <a href="http://www.devdemon.com/credits/" target="_blank">Credits</a> module from DevDemon.</li>
+</ul>
+
+	<h2><a name="using" href="#top">&uarr;</a>Using invitation</h2>
+
+	<h3><a name="using-signup" href="#top">&uarr;</a>Using invitation during signup</h3>
+
+<p>To let people apply invitation code during signup, simply add input field named "invitation" to registration form.</p>
+
+<code>
+&lt;br /&gt;&lt;input type="text" name="invitation" value="" /&gt;<br />
+</code>
+
+	<h3><a name="using-apply" href="#top">&uarr;</a>Applying invitation by existing user</h3>
+
+<p>You can also let existing users apply invitation codes to their account. Please refer to <a href="#tags-apply">tags reference</a>.</p>
+
+
+
+	<h2><a name="cp" href="#top">&uarr;</a>Control Panel</h2>
+
+	<h3><a name="cp-settings" href="#top">&uarr;</a>Settings</h3>
+
+<p>If you have MSM installed, setting are saved separately for each site.</p>
+<p>The available settings for Invitations module are:</p>
+
+<p><strong>Invitation is required?</strong> - mark the checkbox if the users can sign up only of they know invitation code</p>
+
+<p><strong>Freeform from that requires valid invitation</strong> - if checked, given forms created using Freeform module can be submitted only if "invitation" field is submitted and contains valid code</p>
+
+<p><strong>Default members group to assign	</strong> - if you want to use separate membership group for people who sign up using invitation, you can define default one here (can be overridden during code generation)</p>
+<p><strong>Default credits for invitation author	</strong> - define the amount of credits that will be added to author's account when invitation is used (requires Credits module)</p>
+<p><strong>Default credits for invitation user</strong> - define the amount of credits that will be added to user's account when invitation is used (requires Credits module)</p>
+
+
+	<h3><a name="cp-list" href="#top">&uarr;</a>Invitations list</a></h3>
+
+<p>The homepage of module's Control Panel shows list of all invitations available for your site(s). You can filter to show all/expired/used/available and also define how many you want to show per page.</p>
+<p>You can also change sorting order by clicking on head for the column you want to sort by (on-page sorting only, does not influence results on other pages, if you have paginations)</p>
+
+
+	<h3><a name="cp-stats" href="#top">&uarr;</a>Invite usage stats</a>
+
+<p>You can access invite details by clicking stats icon from invitations list. You will see the full details for selected code as well as when it has been used and by whom. If the date of usage is not shown, it means that the user has not yet completed the registration (or not approved yet).</p>
+
+	<h3><a name="cp-generate" href="#top">&uarr;</a>Generating invitation code</a>
+
+<p>Click "Generate" button at the right top to create new invite code. <p>
+<p>Enter any word to be used as code, or click '(Generate)' to get an authomatic one. You can also leave the field empty to use authomatic value.</p>
+
+<p>Define membership group to be assigned after registration is complete.</p>
+<p>If you want to restrict invite code to be used only with certain email address (i.e. only by certain person), enter that email into Restrict to email address field.</p>
+<p>Set number of times the code can be used (defaults to one time) or mark checkbox to use no limit.</p>
+<p>You can also optionally set the date when the code will expire and can not be used anymore.</p>
+<p>If you have Credits module installed, you can also set Credits for invitation author and user. The amounts will be added after invitation code is used (by new or existing user). For new user, the credit is applies only after the registration is complete (email address validated, or manually validated by admin - if you use that kind of validation). For existing users, the code can be used (and credit is applied) only if code usage will result in change of membership group.</p>
+
+	<h3><a name="cp-batch" href="#top">&uarr;</a>Batch code generation</a>
+
+<p>You can generate several codes at once by clicking 'Batch Generate'. All fields are the same, except that you are forced to use auto-generated values for invitation codes. You'll also be asked about number of invites you want (defaults to 5).</p>
+
+
+	<h2><a name="tags" href="#top">&uarr;</a>Template tags</h2>
+
+	<h3><a name="tags-Generate" href="#top">&uarr;</a>Generate invitation code</h3>
+
+<p>You can let your existing users invite other people by generating invitation codes. Outputs the invite code that can be passed to other people. You need to perform your own checks on who's allowed to generate invitations.</p>
+<p>All codes generated on frontend can be used just once.</p>
+<p>Simple example</p>
+
+<code>
+{exp:invitations:generate}
+</code>    
+
+<p>Advanced example</p>
+
+<code>
+{exp:invitations:generate email="my-friend@domain.com" destination_group_id="8" credits_author="5" credits_user="1" expire_in="10 days"}
+</code> 
+    
+<p><strong>Parameters</strong> (all optional): 
+<ul>
+<li><dfn>email</dfn> &mdash; specify invitee email address if you want to restrict usage of this code to this email owner only</li>
+<li><dfn>destination_group_id</dfn> &mdash; member's group ID to assign (overrides default value)</li>
+<li><dfn>credits_author</dfn> &mdash; amount of credits to be added to account of member who generated code</li>
+<li><dfn>credits_user</dfn> &mdash; amount of credits to be added to account of member who used code</li>
+<li><dfn>expire_in</dfn> &mdash; define after what time the code will be considered as expired. The value of this parameter is English phrase, e.g. expire_in="5 days", expire_in="2 month" etc.</li>
+<li><dfn>expire_on</dfn> &mdash; set on what time exactly the invitation will expire. The value of this parameter is date and time in format 2012-01-28 3:16 PM</li>
+</ul>
+</p>
+
+
+    
+    
+    
+    
+    <h3><a name="tags-display" href="#top">&uarr;</a>Display invitations</h3>
+
+<p>This tags allows you display all invitations ever generated, or invitations that still can be used, or invitations by currently logged in user.</p>
+    
+<code>
+{exp:invitations:display mode="all" paginate="both" limit="10"}<br />
+{paginate}{pagination_links}{/paginate}<br />
+&lt;p&gt;{count}. &lt;strong&gt;{code}&lt;/strong&gt; <br />
+{if valid}<br />
+Can be used {use_left} times<br />
+{/if}<br />
+{if not_valid}<br />
+Can not be used anymore<br />
+{/if}<br />
+{if used}<br />
+Used by:<br />
+{users backspace="1"}<br />
+&lt;a href="{path=member/profile/{user_id}}"&gt;{user_screen_name}&lt;/a&gt;, <br />
+{/users}<br />
+{/if}<br />
+&lt;p&gt;<br />
+{/exp:invitations:display}
+</code>
+
+
+<p><strong>Tag parameters</strong>(all optional):
+<ul>
+<li><dfn>mode</dfn> &mdash; set to show all invitations (mode="all"), valid only (mode="valid") or only generated by logged in user (mode="my")</li>
+<li><dfn>limit</dfn> &mdash; number of codes per page, if you want to use pagination</li>
+<li><dfn>paginate</dfn> &mdash; place to display pagination links. Can be 'top', 'bottom' or 'both'. Defaults to 'bottom'</li>
+<li><dfn>backspace="X"</dfn> &mdash; remove X last characters from tag output result</li>
+</ul>
+</p>
+
+<p><strong>Conditional variables:</strong>
+<ul>
+<li><dfn>{if no_results}{/if}</dfn> &mdash; displayed if there are no codes to show</li>
+<li><dfn>{if valid}{/if}</dfn> &mdash; displayed if invitation is valid and can be used</li>
+<li><dfn>{if not_valid}{/if}</dfn> &mdash; displayed if invitation is not valid and can not be used (expired or reached usage limit)</li>
+<li><dfn>{if expired}{/if}</dfn> &mdash; displayed if the code has expired</li>
+<li><dfn>{if used}{/if}</dfn> &mdash; displayed if the code has been used at least one time</li>
+
+</ul>
+</p>
+
+<p><strong>Single variables:</strong>
+<ul>
+<li><dfn>total_results</dfn> &mdash; total number of invitations in provided mode</li>
+<li><dfn>count</dfn> &mdash; invites counter on each page</li>
+<li><dfn>absolute_count</dfn> &mdash; invites counter throughout all pages</li>
+<li><dfn>code</dfn> &mdash; the actual invitation code string</li>
+<li><dfn>author_id</dfn> &mdash; member ID of person who created this invitation</li>
+<li><dfn>author_username</dfn> &mdash; username of person who created this invitation</li>
+<li><dfn>author_screen_name</dfn> &mdash; screen name of person who created this invitation</li>
+<li><dfn>destination_group_id</dfn> &mdash; membership group that will be assigned to user of this code</li>
+<li><dfn>restricted_email</dfn> &mdash; if the code is restricted to be used with certain email address, shows this address</li>
+<li><dfn>credits_author</dfn> &mdash; amount of credits for code author (using Credits module)</li>
+<li><dfn>credits_user</dfn> &mdash; amount of credits for code user (using Credits module)</li>
+<li><dfn>use_count</dfn> &mdash; number of times the code has been used</li>
+<li><dfn>use_left</dfn> &mdash; number of times the code still can be used (if no limit, shows the word 'unlimited')</li>
+<li><dfn>created_date format="%Y-%m-%d"</dfn> &mdash; the date when code has been created. Standard EE date formatting rules apply.</li>
+<li><dfn>expires_date format="%Y-%m-%d"</dfn> &mdash; the date when code expires. Standard EE date formatting rules apply.</li>
+</ul>
+</p>    
+    
+    
+<p><strong>Variable pairs:</strong></p>  
+
+<p><strong>{users backspace="X"}{/users}</strong> &mdash; display list of members who used this code.</p>
+<ul>
+<li><dfn>user_id</dfn> &mdash; user's member ID</li>
+<li><dfn>user_username</dfn> &mdash; user's username</li>
+<li><dfn>user_screen_name</dfn> &mdash; user's screen name</li>
+<li><dfn>used_date format="%Y-%m-%d"</dfn> &mdash; the date when invitations was used. Standard EE date formatting rules apply.</li>
+</ul>
+  
+<p><strong>{paginate}{/paginate}</strong> &mdash; used to format and display pagination links (if you have limit parameter set and there's more than one page)</p>
+<ul>
+<li><dfn>pagination_links</dfn> &mdash; the actual pagination links</li>
+</ul>  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    <h3><a name="tags-apply" href="#top">&uarr;</a>Applying invitation by existing user</h3>
+    
+<p>You can also let your existing users apply invitation (consider is as promo code) to be authomatically moved to destination group.</p>
+
+<code>
+{exp:invitations:apply return="SAME_PAGE"}<br />
+&lt;p&gt;Got promo code? Apply it here:&lt;/p&gt;
+&lt;p&gt;&lt;input name="invitation" value="" /&gt;&lt;/p&gt;<br />
+&lt;p&gt;&lt;input type="submit" value="Apply" /&gt;&lt;/p&gt;<br />
+{/exp:invitations:apply}
+</code> 
+
+<p><strong>Tag parameters:</strong>
+<ul>
+<li><dfn>return</dfn> &mdash; a page to return after sending message. Can be a full URL or URI segments.<br />Use <em>return="SAME_PAGE"</em> to return user to the page used to display form.</li>
+<li><dfn>id</dfn> &mdash; form ID (defaults to 'invitations_form')</li>
+<li><dfn>class</dfn> &mdash; form class (defaults to 'invitations_form')</li>
+<li><dfn>name</dfn> &mdash; form name (defaults to 'invitations_form')</li>
+</ul>
+</p>
+
+<p><strong>Form fields</strong>:
+<ul>
+<li><dfn>invitation</dfn> &mdash; input for invitation/promo code</li>
+</ul>
+</p>
+
+
+
+    <h3><a name="tags-referrals" href="#top">&uarr;</a>Referrals</h3>
+    
+<p>It's possible to list referrals for your site member(s), i.e. people who registered using invitation code generated by that person.</p>
+
+<code>
+&lt;p&gt;My referrals&lt;/p&gt;
+{exp:invitations:referrals}<br />
+&lt;p&gt;&lt;a href="{path=member/profile/{member_id}}"&gt;{screen_name}&lt;/a&gt;,&lt;/p&gt;<br />
+{/exp:invitations:referrals}
+</code> 
+
+<p><strong>Tag parameters:</strong>
+<ul>
+<li><dfn>member_id</dfn> &mdash; ID of member for whom we want to display referrals. Defaults to logged in member.</li>
+<li><dfn>backspace="X"</dfn> &mdash; remove X last characters from tag output result</li>
+</ul>
+</p>
+
+<p><strong>Single variables:</strong>
+<ul>
+<li><dfn>total_results</dfn> &mdash; total number of referrals for give member</li>
+<li><dfn>member_id</dfn> &mdash; referral's member ID</li>
+<li><dfn>username</dfn> &mdash; referral's username</li>
+<li><dfn>screen_name</dfn> &mdash; referral's screen name</li>
+<li><dfn>group_id</dfn> &mdash; referral's membership group</li>
+</ul>
+</p>    
+
+
+
+
+
+
+    <h3><a name="tags-referrer" href="#top">&uarr;</a>Referrer</h3>
+    
+<p>You can also display who has referred current (or any) user to the site (i.e. who generated the code he used)</p>
+
+<code>
+{exp:invitations:referrer}<br />
+&lt;p&gt;I've been referred by &lt;a href="{path=member/profile/{member_id}}"&gt;{screen_name}&lt;/a&gt;&lt;/p&gt;<br />
+{if no_results}&lt;p&gt;I've found this place myself&lt;/p&gt;{/if}<br />
+{/exp:invitations:referrer}
+</code> 
+
+<p><strong>Tag parameters:</strong>
+<ul>
+<li><dfn>member_id</dfn> &mdash; ID of member for whom we want to display referrals. Defaults to logged in member.</li>
+</ul>
+</p>
+
+<p><strong>Single variables:</strong>
+<ul>
+<li><dfn>member_id</dfn> &mdash; referrer's member ID</li>
+<li><dfn>username</dfn> &mdash; referrer's username</li>
+<li><dfn>screen_name</dfn> &mdash; referrer's screen name</li>
+<li><dfn>group_id</dfn> &mdash; referrer's membership group</li>
+</ul>
+</p>    
+
+
+
+
+
+</div>
+
+<p class="center"><a href="#top">Top of page</a></p>
+
+<!-- {user_guide_comments} -->
+
+<div id="footer">
+  <address>Copyright &copy; 2011 Yuri Salimovskiy <a href="http://www.intoeetive.com/">intoEEtive.com</a></address>
+</div>
+
+</body>
+</html>
