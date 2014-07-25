@@ -331,39 +331,7 @@ class Invitations {
             $out = substr($out, 0, - $backspace);
         }
         
-        if ($total > $this->perpage)
-        {
-            $this->EE->load->library('pagination');
-
-			$config['base_url']		= $basepath;
-			$config['prefix']		= 'P';
-			$config['total_rows'] 	= $total;
-			$config['per_page']		= $this->perpage;
-			$config['cur_page']		= $start;
-			$config['first_link'] 	= $this->EE->lang->line('pag_first_link');
-			$config['last_link'] 	= $this->EE->lang->line('pag_last_link');
-
-			$this->EE->pagination->initialize($config);
-			$pagination_links = $this->EE->pagination->create_links();	
-            $paginate_tagdata = $this->EE->TMPL->swap_var_single('pagination_links', $pagination_links, $paginate_tagdata);			
-        }
-        else
-        {
-            $paginate_tagdata = $this->EE->TMPL->swap_var_single('pagination_links', '', $paginate_tagdata);		
-        }
-        
-        switch ($paginate)
-        {
-            case 'top':
-                $out = $paginate_tagdata.$out;
-                break;
-            case 'both':
-                $out = $paginate_tagdata.$out.$paginate_tagdata;
-                break;
-            case 'bottom':
-            default:
-                $out = $out.$paginate_tagdata;
-        }
+        $out = $this->_process_pagination($total, $this->perpage, $start, $basepath, $out, $paginate, $paginate_tagdata);
         
         return $out;
     	
@@ -780,6 +748,78 @@ class Invitations {
             return $this->EE->localize->string_to_timestamp($human_string, $localized);
         }
     }
+    
+    
+    function _process_pagination($total, $perpage, $start, $basepath='', $out='', $paginate='bottom', $paginate_tagdata='')
+    {
+        if ($this->EE->config->item('app_version') >= 240)
+		{
+	        $this->EE->load->library('pagination');
+	        if ($this->EE->config->item('app_version') >= 260)
+	        {
+	        	$pagination = $this->EE->pagination->create(__CLASS__);
+	        }
+	        else
+	        {
+	        	$pagination = new Pagination_object(__CLASS__);
+	        }
+            if ($this->EE->config->item('app_version') >= 280)
+            {
+                $this->EE->TMPL->tagdata = $pagination->prepare($this->EE->TMPL->tagdata);
+                $pagination->build($total, $perpage);
+            }
+            else
+            {
+                $pagination->get_template();
+    	        $pagination->per_page = $perpage;
+    	        $pagination->total_rows = $total;
+    	        $pagination->offset = $start;
+    	        $pagination->build($pagination->per_page);
+            }
+	        
+	        $out = $pagination->render($out);
+  		}
+  		else
+  		{
+        
+	        if ($total > $perpage)
+	        {
+	            $this->EE->load->library('pagination');
+	
+				$config['base_url']		= $basepath;
+				$config['prefix']		= 'P';
+				$config['total_rows'] 	= $total;
+				$config['per_page']		= $perpage;
+				$config['cur_page']		= $start;
+				$config['first_link'] 	= $this->EE->lang->line('pag_first_link');
+				$config['last_link'] 	= $this->EE->lang->line('pag_last_link');
+	
+				$this->EE->pagination->initialize($config);
+				$pagination_links = $this->EE->pagination->create_links();	
+	            $paginate_tagdata = $this->EE->TMPL->swap_var_single('pagination_links', $pagination_links, $paginate_tagdata);			
+	        }
+	        else
+	        {
+	            $paginate_tagdata = $this->EE->TMPL->swap_var_single('pagination_links', '', $paginate_tagdata);		
+	        }
+	        
+	        switch ($paginate)
+	        {
+	            case 'top':
+	                $out = $paginate_tagdata.$out;
+	                break;
+	            case 'both':
+	                $out = $paginate_tagdata.$out.$paginate_tagdata;
+	                break;
+	            case 'bottom':
+	            default:
+	                $out = $out.$paginate_tagdata;
+	        }
+	        
+    	}
+        
+        return $out;
+    }    
     
 
 }

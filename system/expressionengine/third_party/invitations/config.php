@@ -3,7 +3,7 @@
 if ( ! defined('INVITATIONS_ADDON_NAME'))
 {
 	define('INVITATIONS_ADDON_NAME',         'Invitations');
-	define('INVITATIONS_ADDON_VERSION',      '1.2.2');
+	define('INVITATIONS_ADDON_VERSION',      '1.2.3');
 }
 
 $config['name']=INVITATIONS_ADDON_NAME;
