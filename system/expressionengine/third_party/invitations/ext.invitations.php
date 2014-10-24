@@ -314,9 +314,15 @@ class Invitations_ext {
     
 	function create_record($data, $member_id)
 	{
-		$this->EE->db->select('code_id')
+		if ($this->EE->input->get_post('invitation')=='')
+        {
+            return false;
+        }
+        
+        $this->EE->db->select('code_id')
     				->from('invitations_codes')
-    				->where('code', $this->EE->input->get_post('invitation'));
+    				->where('code', $this->EE->input->get_post('invitation'))
+                    ->where('code != ', '');
 		$q = $this->EE->db->get();
 		if ($q->num_rows()==0)
 		{
