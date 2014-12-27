@@ -244,6 +244,90 @@ class Invitations_mcp {
 	
     }    
     
+    
+    function requests()
+    {
+        $this->EE->load->helper('form');
+    	$this->EE->load->library('table');  
+        $this->EE->load->library('javascript');
+
+    	$vars = array();
+        
+        if ($this->EE->input->get_post('perpage')!==false)
+        {
+        	$this->perpage = $this->EE->input->get_post('perpage');	
+        }
+        $vars['selected']['perpage'] = $this->perpage;
+
+        
+        $vars['selected']['rownum']=($this->EE->input->get_post('rownum')!='')?$this->EE->input->get_post('rownum'):0;
+        
+        $this->EE->db->select()
+        			->from('invitations_requests');
+
+		if ($this->perpage!=0)
+		{
+        	$this->EE->db->limit($this->perpage, $vars['selected']['rownum']);
+ 		}
+
+        $query = $this->EE->db->get();
+        $vars['total_count'] = $query->num_rows();
+        
+        $date_fmt = ($this->EE->session->userdata('time_format') != '') ? $this->EE->session->userdata('time_format') : $this->EE->config->item('time_format');
+        $date_format = ($date_fmt == 'us')? '%m/%d/%y %h:%i %a' : '%Y-%m-%d %H:%i';
+        
+        $vars['table_headings'] = array(
+                        $this->EE->lang->line('email'),
+                        $this->EE->lang->line('comment'),
+                        $this->EE->lang->line('invite')
+        			); 
+					
+		   
+		$i = 0;
+        foreach ($query->result_array() as $row)
+        {
+           $vars['requests'][$i]['email'] = $row['email'];
+           $vars['requests'][$i]['comment'] = $row['comment'];
+           $vars['requests'][$i]['invite'] = "<a href=\"".BASE.AMP.'C=addons_modules'.AMP.'M=show_module_cp'.AMP.'module=invitations'.AMP.'method=generate'.AMP.'request_id='.$row['request_id']."\">".$this->EE->lang->line('invite_user')."</a>";
+           $i++;
+ 			
+        }
+        
+        $this->EE->jquery->tablesorter('.mainTable', '{
+			headers: {},
+			widgets: ["zebra"]
+		}');
+
+
+		if ($this->perpage==0)
+		{
+        	$total = $query->num_rows();
+ 		}
+ 		else
+ 		{
+ 			$this->EE->db->select('COUNT(*) AS count');
+	        $this->EE->db->from('invitations_requests');
+	        $q = $this->EE->db->get();
+	        
+	        $total = $q->row('count');
+ 		}
+
+        $this->EE->load->library('pagination');
+
+        $base_url = BASE.AMP.'C=addons_modules'.AMP.'M=show_module_cp'.AMP.'module=invitations'.AMP.'method=requests';
+        $base_url .= AMP.'perpage='.$vars['selected']['perpage'];
+
+        $p_config = $this->_p_config($base_url, $total);
+
+		$this->EE->pagination->initialize($p_config);
+        
+		$vars['pagination'] = $this->EE->pagination->create_links();
+        
+    	return $this->EE->load->view('requests', $vars, TRUE);
+	
+    }    
+    
+    
     function generate()
     {
     	$this->EE->load->helper('form');
@@ -300,7 +384,7 @@ class Invitations_mcp {
 
         $vars['data'] = array();
         $vars['data'][] = array(
-            lang('code').' &nbsp; <a href="#" class="submit" id="get_code">('.lang('generate').')</a> &nbsp; ',
+            lang('code').NBS.lang('leave_blank'),//.' &nbsp; <a href="#" class="submit" id="get_code">('.lang('generate').')</a> &nbsp; ',
             form_input('code', '', 'style="width: 100%"')
 		);
         
@@ -329,7 +413,19 @@ class Invitations_mcp {
         }
 
         $vars['data'][] = array(lang('destination_group_id'), form_dropdown('destination_group_id', $member_groups, isset($settings['destination_group_id'])?$settings['destination_group_id']:0));
-        $vars['data'][] = array(lang('restrict_to_email'), form_input('email'));
+        $email = '';
+        if ($this->EE->input->get('request_id')!='')
+        {
+            $req_q = $this->EE->db->select('email')
+                ->from('invitations_requests')
+                ->where('request_id', $this->EE->input->get('request_id'))
+                ->get();
+            if ($req_q->num_rows()>0)
+            {
+                $email = $req_q->row('email');
+            }
+        }
+        $vars['data'][] = array(lang('restrict_to_email'), form_input('email', $email));
         $vars['data'][] = array(lang('usage_limit'), form_input('usage_limit', '1'));
         $vars['data'][] = array(lang('unlimited_usage'), form_checkbox('unlimited_usage', 'y', false));
         $vars['data'][] = array(lang('expires_date'), form_input('expires_date', ''));
@@ -348,6 +444,7 @@ class Invitations_mcp {
     		}
         }
         $vars['data'][] = array(lang('note'), form_input('note', ''));
+        $vars['data'][] = array(lang('email_user'), form_checkbox('email_user', 'y', ($email!='')?true:false));
         
     	return $this->EE->load->view('generate', $vars, TRUE);
 		
@@ -387,6 +484,38 @@ class Invitations_mcp {
 		);
 		
 		$this->EE->db->insert('invitations_codes', $data);
+        
+        if ($this->EE->input->post('email_user')=='y' && $data['email']!='')
+        {
+            //email user
+            $query = $this->EE->db->select("data_title, template_data")
+                    ->from('specialty_templates')
+                    ->where('template_name', 'invitation_generated_email')
+                    ->limit('1')
+                    ->get();
+                    
+            $email_subject = $this->EE->functions->var_swap($query->row('data_title'), $data);
+    		$email_msg = $this->EE->functions->var_swap($query->row('template_data'), $data);
+            
+            $this->EE->load->library('email');
+
+			// Load the text helper
+			$this->EE->load->helper('text');
+
+			$this->EE->email->EE_initialize();
+			$this->EE->email->wordwrap = FALSE;
+			$this->EE->email->from($this->EE->config->item('webmaster_email'), $this->EE->config->item('webmaster_name'));
+			$this->EE->email->to($data['email']);
+			$this->EE->email->reply_to($this->EE->config->item('webmaster_email'));
+			$this->EE->email->subject($email_subject);
+			$this->EE->email->message(entities_to_ascii($email_msg));
+			$this->EE->email->send();
+            
+            //if there is pending request, remove it
+            $this->EE->db->where('email', $data['email']);
+            $this->EE->db->delete('invitations_requests');
+                
+        }
 
         $this->EE->functions->redirect(BASE.AMP.'C=addons_modules'.AMP.'M=show_module_cp'.AMP.'module=invitations'.AMP.'method=index');
 
@@ -695,7 +824,7 @@ class Invitations_mcp {
     function settings()
     {
 		$settings = $this->_get_settings();
-		
+
         $this->EE->load->helper('form');
     	$this->EE->load->library('table');
     	
@@ -710,6 +839,7 @@ class Invitations_mcp {
         }
  
         $vars['settings'] = array(	
+            'notify_on_requests'	=> form_checkbox('notify_on_requests', 'y', $settings['notify_on_requests']),
             'invitation_required'	=> form_checkbox('invitation_required', 'y', $settings['invitation_required']),
             'default_group_id'	=> form_dropdown('destination_group_id', $member_groups, $settings['destination_group_id'])
     		);
@@ -755,6 +885,8 @@ class Invitations_mcp {
 		
 		$query = $this->EE->db->query("SELECT settings FROM exp_modules WHERE module_name='Invitations' LIMIT 1");
         $settings = unserialize($query->row('settings')); 
+        
+        $settings[$this->site_id]['notify_on_requests'] = (isset($_POST['notify_on_requests']) && $_POST['notify_on_requests']=='y')?true:false;
 		
         $settings[$this->site_id]['invitation_required'] = (isset($_POST['invitation_required']) && $_POST['invitation_required']=='y')?true:false;
         $settings[$this->site_id]['invitation_required_freeform'] = (isset($_POST['invitation_required_freeform']))?$_POST['invitation_required_freeform']:array();
@@ -769,6 +901,52 @@ class Invitations_mcp {
         
         $this->EE->functions->redirect(BASE.AMP.'C=addons_modules'.AMP.'M=show_module_cp'.AMP.'module=invitations'.AMP.'method=settings');
     }
+    
+    
+    
+    function email_templates()
+    {
+
+        $this->EE->load->helper('form');
+    	$this->EE->load->library('table');
+ 
+        $this->EE->db->select('template_name, data_title, template_data')
+                    ->from('specialty_templates')
+                    ->like('template_name', 'invitation', 'after');
+        $query = $this->EE->db->get();
+        foreach ($query->result_array() as $row)
+        {
+            $vars['data'][$row['template_name']] = array(	
+                'data_title'	=> form_input("{$row['template_name']}"."[data_title]", $row['data_title'], 'style="width: 100%"'),
+                'template_data'	=> form_textarea("{$row['template_name']}"."[template_data]", $row['template_data'])
+        		);
+    	}
+
+    	return $this->EE->load->view('email_templates', $vars, TRUE);
+	
+    }    
+    
+    function save_email_templates()
+    {
+        
+        $query = $this->EE->db->select('template_name')->like('template_name', 'invitation', 'after')->get('specialty_templates');
+
+        foreach ($query->result_array() as $row)
+        {
+            $template = $row['template_name'];
+            $data_title = (isset($_POST[$template]['data_title']))?$this->EE->security->xss_clean($_POST[$template]['data_title']):$this->EE->lang->line($template.'_subject');
+            $template_data = (isset($_POST[$template]['template_data']))?$this->EE->security->xss_clean($_POST[$template]['template_data']):$this->EE->lang->line($template.'_message');
+            
+            $this->EE->db->where('template_name', $template);
+            $this->EE->db->update('specialty_templates', array('data_title' => $data_title, 'template_data' => $template_data));
+        }       
+
+        $this->EE->session->set_flashdata('message_success', $this->EE->lang->line('preferences_updated'));
+        
+        $this->EE->functions->redirect(BASE.AMP.'C=addons_modules'.AMP.'M=show_module_cp'.AMP.'module=invitations'.AMP.'method=email_templates');
+    }
+    
+    
     
     function _p_config($base_url, $total_rows)
     {
@@ -798,7 +976,8 @@ class Invitations_mcp {
         else
         {
         	return array(
-				'invitation_required'=>false,
+				'notify_on_requests'=>true,
+                'invitation_required'=>false,
 	            'destination_group_id'=>'0',
 	            'default_credits_author'=>0,
 	            'default_credits_user'=>0

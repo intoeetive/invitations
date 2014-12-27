@@ -60,6 +60,9 @@ class Invitations_upd {
         $data = array( 'class' => 'Invitations' , 'method' => 'process_apply' ); 
         $this->EE->db->insert('actions', $data); 
         
+        $data = array( 'class' => 'Invitations' , 'method' => 'process_invitation_request' ); 
+        $this->EE->db->insert('actions', $data); 
+        
         $this->EE->db->query("CREATE TABLE IF NOT EXISTS `exp_invitations_codes` (
               `code_id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY ,
               `code` VARCHAR(100) NOT NULL,
@@ -87,6 +90,22 @@ class Invitations_upd {
           KEY `member_id` (`member_id`),
           KEY `code_id` (`code_id`)
         )");
+        
+        
+        
+        //exp_invitations_requests
+		$fields = array(
+			'request_id'		=> array('type' => 'INT',		'unsigned' => TRUE, 'auto_increment' => TRUE),
+			'email'			    => array('type' => 'VARCHAR',	'constraint'=> 150,	'default' => ''),
+			'comment'			=> array('type' => 'TEXT'),
+			'request_date'		=> array('type' => 'INT',		'unsigned' => TRUE, 'default' => 0)
+		);
+
+		$this->EE->dbforge->add_field($fields);
+		$this->EE->dbforge->add_key('request_id', TRUE);
+        $this->EE->dbforge->add_key('email');
+		$this->EE->dbforge->create_table('invitations_requests', TRUE);
+        
 
         //credits
         
@@ -111,12 +130,33 @@ class Invitations_upd {
 			$this->EE->db->insert('exp_credits_actions', $data);
         }
         
+        //notification templates
+        $data = array( 
+			'site_id' => $this->EE->config->item('site_id'), 
+			'enable_template' => 'y', 
+			'template_name' => 'invitation_requested_email', 
+			'data_title'=> $this->EE->lang->line('invitation_requested_email_subject'), 
+			'template_data'=> $this->EE->lang->line('invitation_requested_email_message') 
+		); 
+        $this->EE->db->insert('specialty_templates', $data); 
+        
+        $data = array( 
+			'site_id' => $this->EE->config->item('site_id'), 
+			'enable_template' => 'y', 
+			'template_name' => 'invitation_generated_email', 
+			'data_title'=> $this->EE->lang->line('invitation_generated_email_subject'), 
+			'template_data'=> $this->EE->lang->line('invitation_generated_email_message') 
+		); 
+        $this->EE->db->insert('specialty_templates', $data); 
+        
         return TRUE; 
         
     } 
     
     function uninstall() { 
 
+        $this->EE->load->dbforge(); 
+        
         $this->EE->db->select('module_id'); 
         $query = $this->EE->db->get_where('modules', array('module_name' => 'Invitations')); 
         
@@ -129,8 +169,13 @@ class Invitations_upd {
         $this->EE->db->where('class', 'Invitations'); 
         $this->EE->db->delete('actions'); 
         
-        $this->EE->db->query("DROP TABLE exp_invitations_codes");
-        $this->EE->db->query("DROP TABLE exp_invitations_uses");
+        $this->EE->db->where('template_name', 'invitation_requested_email');
+        $this->EE->db->or_where('template_name', 'invitation_generated_email');
+        $this->EE->db->delete('specialty_templates'); 
+        
+        $this->EE->dbforge->drop_table('invitations_codes');
+        $this->EE->dbforge->drop_table('invitations_uses');
+        $this->EE->dbforge->drop_table('invitations_requests');
         
         $this->EE->db->select('module_id'); 
         $credits_installed_q = $this->EE->db->get_where('modules', array('module_name' => 'Credits')); 
@@ -146,7 +191,8 @@ class Invitations_upd {
     
     function update($current='') 
 	{ 
-        if ($current < 1.1) { 
+        if ($current < 1.1) 
+        { 
             $this->EE->load->dbforge(); 
    			$this->EE->dbforge->add_column('invitations_codes', array('note' => array('type' => 'VARCHAR', 'constraint' => '255', 'default'=>'') ) );
         } 
@@ -177,6 +223,46 @@ class Invitations_upd {
             $this->EE->db->insert('extensions', $data);
 
         }
+        
+        if ($current < 1.3) 
+        { 
+            $this->EE->load->dbforge(); 
+            //exp_invitations_requests
+    		$fields = array(
+    			'request_id'		=> array('type' => 'INT',		'unsigned' => TRUE, 'auto_increment' => TRUE),
+    			'email'			    => array('type' => 'VARCHAR',	'constraint'=> 150,	'default' => ''),
+    			'comment'			=> array('type' => 'TEXT'),
+    			'request_date'		=> array('type' => 'INT',		'unsigned' => TRUE, 'default' => 0)
+    		);
+    
+    		$this->EE->dbforge->add_field($fields);
+    		$this->EE->dbforge->add_key('request_id', TRUE);
+            $this->EE->dbforge->add_key('email');
+    		$this->EE->dbforge->create_table('invitations_requests', TRUE);
+            
+            $data = array( 'class' => 'Invitations' , 'method' => 'process_invitation_request' ); 
+            $this->EE->db->insert('actions', $data); 
+            
+            //notification templates
+            $data = array( 
+    			'site_id' => $this->EE->config->item('site_id'), 
+    			'enable_template' => 'y', 
+    			'template_name' => 'invitation_requested_email', 
+    			'data_title'=> $this->EE->lang->line('invitation_requested_email_subject'), 
+    			'template_data'=> $this->EE->lang->line('invitation_requested_email_message') 
+    		); 
+            $this->EE->db->insert('specialty_templates', $data); 
+            
+            $data = array( 
+    			'site_id' => $this->EE->config->item('site_id'), 
+    			'enable_template' => 'y', 
+    			'template_name' => 'invitation_generated_email', 
+    			'data_title'=> $this->EE->lang->line('invitation_generated_email_subject'), 
+    			'template_data'=> $this->EE->lang->line('invitation_generated_email_message') 
+    		); 
+            $this->EE->db->insert('specialty_templates', $data); 
+        }
+        
         return TRUE; 
     } 
 	

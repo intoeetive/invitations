@@ -56,7 +56,8 @@ class Invitations {
         else
         {
         	return array(
-				'invitation_required'=>false,
+				'notify_on_requests'=>true,
+                'invitation_required'=>false,
 	            'destination_group_id'=>'0',
 	            'default_credits_author'=>0,
 	            'default_credits_user'=>0
@@ -440,6 +441,113 @@ class Invitations {
 		
 		return $data;
     }
+    
+    function request()
+    {
+
+		if ($this->EE->TMPL->fetch_param('return')=='')
+        {
+            $return = $this->EE->functions->fetch_site_index();
+        }
+        else if ($this->EE->TMPL->fetch_param('return')=='SAME_PAGE')
+        {
+            $return = $this->EE->functions->fetch_current_uri();
+        }
+        else if (strpos($this->EE->TMPL->fetch_param('return'), "http://")!==FALSE || strpos($this->EE->TMPL->fetch_param('return'), "https://")!==FALSE)
+        {
+            $return = $this->EE->TMPL->fetch_param('return');
+        }
+        else
+        {
+            $return = $this->EE->functions->create_url($this->EE->TMPL->fetch_param('return'));
+        }
+        
+        $data['hidden_fields']['ACT'] = $this->EE->functions->fetch_action_id('Invitations', 'process_invitation_request');
+		$data['hidden_fields']['RET'] = $return;
+        $data['hidden_fields']['PRV'] = $this->EE->functions->fetch_current_uri();
+        
+        if ($this->EE->TMPL->fetch_param('ajax')=='yes') $data['hidden_fields']['ajax'] = 'yes';
+									      
+        $data['id']		= ($this->EE->TMPL->fetch_param('id')!='') ? $this->EE->TMPL->fetch_param('id') : 'invitations_request_form';
+        $data['name']		= ($this->EE->TMPL->fetch_param('name')!='') ? $this->EE->TMPL->fetch_param('name') : 'invitations_request_form';
+        $data['class']		= ($this->EE->TMPL->fetch_param('class')!='') ? $this->EE->TMPL->fetch_param('class') : 'invitations_request_form';
+		
+		$tagdata = $this->EE->TMPL->tagdata;
+		
+        $out = $this->EE->functions->form_declaration($data).$tagdata."\n"."</form>";
+        
+        return $out;
+    }
+    
+    
+    function process_invitation_request()
+    {
+        
+        //email submitted?
+        if ($this->EE->input->post('email')=='')
+        {
+            $this->EE->output->show_user_error('submission', lang('email_is_required'));
+        }
+        
+        //email valid?
+        $this->EE->load->helper('email');
+        
+        if (!valid_email($this->EE->input->post('email')))
+        {
+            $this->EE->output->show_user_error('submission', lang('email_is_required'));
+        }
+        
+        //email not in the db yet?
+        $q = $this->EE->db->select('email')
+                ->from('invitations_requests')
+                ->where('email', $this->EE->input->post('email'))
+                ->get();
+        if ($q->num_rows()>0)
+        {
+            $this->EE->output->show_user_error('submission', lang('invitation_requested'));
+        }
+        
+        $ins = array(
+            'email'			    => $this->EE->input->post('email'),
+			'comment'			=> $this->EE->input->post('comment'),
+			'request_date'	    => $this->EE->localize->now
+        );
+        
+        $this->EE->db->insert('invitations_requests', $ins);
+        
+        //send the notification
+        $settings = $this->_get_settings();
+        if ($settings['notify_on_requests']==true)
+        {
+            $query = $this->EE->db->select("data_title, template_data")
+                    ->from('specialty_templates')
+                    ->where('template_name', 'invitation_requested_email')
+                    ->limit('1')
+                    ->get();
+                    
+            $email_subject = $this->EE->functions->var_swap($query->row('data_title'), $ins);
+    		$email_msg = $this->EE->functions->var_swap($query->row('template_data'), $ins);
+            
+            $this->EE->load->library('email');
+
+			// Load the text helper
+			$this->EE->load->helper('text');
+
+			$this->EE->email->EE_initialize();
+			$this->EE->email->wordwrap = FALSE;
+			$this->EE->email->from($this->EE->config->item('webmaster_email'), $this->EE->config->item('webmaster_name'));
+			$this->EE->email->to($this->EE->config->item('webmaster_email'));
+			$this->EE->email->reply_to($this->EE->config->item('webmaster_email'));
+			$this->EE->email->subject($email_subject);
+			$this->EE->email->message(entities_to_ascii($email_msg));
+			$this->EE->email->send();
+
+        }
+        
+        $this->EE->functions->redirect($_POST['RET']);
+        
+    }
+    
     
     function apply()
     {

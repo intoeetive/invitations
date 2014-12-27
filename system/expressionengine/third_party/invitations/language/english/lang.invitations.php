@@ -212,6 +212,65 @@ $lang = array(
 "not_enough_credits_user" =>
 "You don't have enough credits to apply this code",
 
+'email_user' =>
+'Email generated invitation?',
+
+//----------------------------------------
+//initial email templates
+
+"invitation_requested_email"  =>
+"Invitation requested email (to admin)",
+
+"invitation_requested_email_subject"  =>
+"New invitation request",
+
+"invitation_requested_email_message"  =>
+"New invitation requested.
+
+Email: {email}
+Comment: {comment}
+",
+
+"invitation_generated_email"  =>
+"Invitation generated email (to user)",
+
+"invitation_generated_email_subject"  =>
+"Your invitation code",
+
+"invitation_generated_email_message"  =>
+"We are pleased to invite you to our site.
+
+Use this invitation code to register: 
+{code}
+",
+
+'requests' =>
+'Invitation requests',
+
+'email_templates' =>
+'Email templates',
+
+'email_is_required' =>
+'Please provide valid email address',
+
+'invitation_requested' =>
+'The invitation has already been requested for this email address',
+
+'notify_on_requests' =>
+'Email site admin on new invitation requests?',
+
+'invite_user' =>
+'Invite user',
+
+'data_title' => 
+'Subject',
+
+'template_data' =>
+'Message',
+
+'leave_blank' =>
+'(leave blank to use automatically generated)',
+
 /* END */
 ''=>''
 );

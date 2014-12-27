@@ -48,6 +48,8 @@
         <li><a href="#cp">Control Panel</a>
             <ul>
             <li><a href="#cp-settings">Settings</a></li>
+            <li><a href="#cp-email">Notification templates</a></li>
+            <li><a href="#cp-requests">Invitation requests</a></li>    
             <li><a href="#cp-list">Invitations list</a></li>            
             <li><a href="#cp-stats">Invite usage stats</a></li>
             <li><a href="#cp-generate">Generating invitation code</a></li>
@@ -56,6 +58,7 @@
         </li>
         <li><a href="#tags">Template tags</a>
             <ul>
+            <li><a href="#tags-request">Request invitation </a></li>
             <li><a href="#tags-generate">Generate invitation code</a></li>
             <li><a href="#tags-display">Display invitations</a></li>
             <li><a href="#tags-apply">Apply invitation (by existing user)</a></li>
@@ -99,6 +102,8 @@
 <p>If you have MSM installed, setting are saved separately for each site.</p>
 <p>The available settings for Invitations module are:</p>
 
+<p><strong>Email site admin on enw invitation request?</strong> - if checked, email notification will go out to site admin each time notification is requested using frontend form</p>
+
 <p><strong>Invitation is required?</strong> - mark the checkbox if the users can sign up only of they know invitation code</p>
 
 <p><strong>Freeform from that requires valid invitation</strong> - if checked, given forms created using Freeform module can be submitted only if "invitation" field is submitted and contains valid code</p>
@@ -107,6 +112,27 @@
 <p><strong>Default credits for invitation author	</strong> - define the amount of credits that will be added to author's account when invitation is used (requires Credits module)</p>
 <p><strong>Default credits for invitation user</strong> - define the amount of credits that will be added to user's account when invitation is used (requires Credits module)</p>
 
+	<h3><a name="cp-email" href="#top">&uarr;</a>Notification templates</h3>
+
+<p>Set the template for 2 types of notifications that can be sent by module.</p>
+
+<p>The variables available in templates (both for subject and message body) are:</p>
+
+<p><strong>Invitation requested email (to admin)</strong></p>
+<ul>
+<li><em>{code}</em> &mdash; invitation code</li>
+</ul>
+
+<p><strong>Invitation generated email (to user)</strong></p>
+<ul>
+<li><em>{email}</em> &mdash; requester's email</li>
+<li><em>{comment}</em> &mdash; comment left on the form</li>
+</ul>
+
+	<h3><a name="cp-requests" href="#top">&uarr;</a>Invitations requests</a></h3>
+
+<p>Display the list of pending requests for invitations (including email and comment). You can define how many you want to show per page.</p>
+<p>Click on "Invite user" link to go to invitation generation form with email being pre-filled. Once invitation is created, the request is removed from the list.</p>
 
 	<h3><a name="cp-list" href="#top">&uarr;</a>Invitations list</a></h3>
 
@@ -127,6 +153,7 @@
 <p>If you want to restrict invite code to be used only with certain email address (i.e. only by certain person), enter that email into Restrict to email address field.</p>
 <p>Set number of times the code can be used (defaults to one time) or mark checkbox to use no limit.</p>
 <p>You can also optionally set the date when the code will expire and can not be used anymore.</p>
+<p>If you want to send the generated code to user automatically, make sure the email address is entered and "Email generated invitation?" is checked.</p>
 <p>If you have Credits module installed, you can also set Credits for invitation author and user. The amounts will be added after invitation code is used (by new or existing user). For new user, the credit is applies only after the registration is complete (email address validated, or manually validated by admin - if you use that kind of validation). For existing users, the code can be used (and credit is applied) only if code usage will result in change of membership group.</p>
 
 	<h3><a name="cp-batch" href="#top">&uarr;</a>Batch code generation</a>
@@ -136,7 +163,37 @@
 
 	<h2><a name="tags" href="#top">&uarr;</a>Template tags</h2>
 
-	<h3><a name="tags-Generate" href="#top">&uarr;</a>Generate invitation code</h3>
+
+    <h3><a name="tags-request" href="#top">&uarr;</a>Request invitation</h3>
+    
+<p>You can let site users request invitations (and so collect their email addresses) using <em>{exp:invitations:request}</em> form</p>
+
+<code>
+{exp:invitations:request return="SAME_PAGE"}<br />
+&lt;p&gt;Leave your email to get invitation code once we have something to show:&lt;/p&gt;
+&lt;p&gt;&lt;input name="email" value="" /&gt;&lt;/p&gt;<br />
+&lt;p&gt;&lt;input type="submit" value="Ok" /&gt;&lt;/p&gt;<br />
+{/exp:invitations:apply}
+</code> 
+
+<p><strong>Tag parameters:</strong>
+<ul>
+<li><dfn>return</dfn> &mdash; a page to return after sending message. Can be a full URL or URI segments.<br />Use <em>return="SAME_PAGE"</em> to return user to the page used to display form.</li>
+<li><dfn>id</dfn> &mdash; form ID (defaults to 'invitations_form')</li>
+<li><dfn>class</dfn> &mdash; form class (defaults to 'invitations_form')</li>
+<li><dfn>name</dfn> &mdash; form name (defaults to 'invitations_form')</li>
+</ul>
+</p>
+
+<p><strong>Form fields</strong>:
+<ul>
+<li><dfn>email</dfn> &mdash; email address. Mandatory</li>
+<li><dfn>comment</dfn> &mdash; optional comment.</li>
+</ul>
+</p>
+
+
+	<h3><a name="tags-generate" href="#top">&uarr;</a>Generate invitation code</h3>
 
 <p>You can let your existing users invite other people by generating invitation codes. Outputs the invite code that can be passed to other people. You need to perform your own checks on who's allowed to generate invitations.</p>
 <p>All codes generated on frontend can be used just once.</p>

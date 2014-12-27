@@ -1,13 +1,8 @@
 <?=form_open('C=addons_modules'.AMP.'M=show_module_cp'.AMP.'module=invitations'.AMP.'method=create_and_save', array('id'=>'invitations_generate_form'));?>
 
-<ul class="tab_menu" id="tab_menu_tabs">
-<li class="content_tab current"> <a href="<?=BASE.AMP.'C=addons_modules'.AMP.'M=show_module_cp'.AMP.'module=invitations'.AMP.'method=index'?>"><?=lang('invitations')?></a>  </li> 
-<li class="content_tab"> <a href="<?=BASE.AMP.'C=addons_modules'.AMP.'M=show_module_cp'.AMP.'module=invitations'.AMP.'method=settings'?>"><?=lang('settings')?></a>  </li> 
-</ul> 
-<div class="clear_left shun"></div> 
-
 
 <?php 
+$this->load->view('tabs');
 $this->table->set_template($cp_pad_table_template);
 $this->table->set_heading(
     array('data' => '', 'style' => 'width:40%;'),
