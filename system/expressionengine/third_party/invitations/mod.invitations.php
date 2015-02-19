@@ -152,6 +152,9 @@ class Invitations {
         }
 		
 		$this->EE->db->insert('invitations_codes', $data);
+        $data['code_id'] = $this->EE->db->insert_id();
+        
+        $this->EE->extensions->call('invitations_generate_end', $data);
 		
 		return $code;
     }
