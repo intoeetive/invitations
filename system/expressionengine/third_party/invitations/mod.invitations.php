@@ -140,7 +140,7 @@ class Invitations {
         
         if ($this->EE->TMPL->fetch_param('expire_on')!='')
         {
-            if ($this->EE->config->item('app_version')>=260)
+            if (version_compare(APP_VER, '2.6.0', '>='))
 	        {
 				$data['expires_date'] = $this->EE->localize->string_to_timestamp($this->EE->TMPL->fetch_param('expire_on'));
 			}
@@ -837,7 +837,7 @@ class Invitations {
     
     function _format_date($datestr = '', $unixtime = '', $localize = TRUE)
     {
-    	if ($this->EE->config->item('app_version')>=260)
+    	if (version_compare(APP_VER, '2.6.0', '>='))
         {
         	return $this->EE->localize->format_date($datestr, $unixtime, $localize);
         }
@@ -850,7 +850,7 @@ class Invitations {
     
     function _string_to_timestamp($human_string, $localized = TRUE)
     {
-        if ($this->EE->config->item('app_version')<260)
+        if (version_compare(APP_VER, '2.6.0', '<'))
         {
             return $this->EE->localize->convert_human_date_to_gmt($human_string, $localized);
         }
@@ -863,10 +863,10 @@ class Invitations {
     
     function _process_pagination($total, $perpage, $start, $basepath='', $out='', $paginate='bottom', $paginate_tagdata='')
     {
-        if ($this->EE->config->item('app_version') >= 240)
+        if (version_compare(APP_VER, '2.4.0', '>='))
 		{
 	        $this->EE->load->library('pagination');
-	        if ($this->EE->config->item('app_version') >= 260)
+	        if (version_compare(APP_VER, '2.6.0', '>='))
 	        {
 	        	$pagination = $this->EE->pagination->create(__CLASS__);
 	        }
@@ -874,7 +874,7 @@ class Invitations {
 	        {
 	        	$pagination = new Pagination_object(__CLASS__);
 	        }
-            if ($this->EE->config->item('app_version') >= 280)
+            if (version_compare(APP_VER, '2.8.0', '>='))
             {
                 $this->EE->TMPL->tagdata = $pagination->prepare($this->EE->TMPL->tagdata);
                 $pagination->build($total, $perpage);

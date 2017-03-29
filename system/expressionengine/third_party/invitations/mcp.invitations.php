@@ -39,7 +39,7 @@ class Invitations_mcp {
         $this->EE =& get_instance(); 
         $this->site_id = $this->EE->config->item('site_id');
         
-        if ($this->EE->config->item('app_version')>=260)
+        if (version_compare(APP_VER, '2.6.0', '>='))
         {
         	$this->EE->view->cp_page_title = lang('invitations_module_name');
         }
@@ -57,7 +57,7 @@ class Invitations_mcp {
     
     function _format_date($datestr = '', $unixtime = '', $localize = TRUE)
     {
-    	if ($this->EE->config->item('app_version')>=260)
+    	if (version_compare(APP_VER, '2.6.0', '>='))
         {
         	return $this->EE->localize->format_date($datestr, $unixtime, $localize);
         }
@@ -469,7 +469,7 @@ class Invitations_mcp {
 		$data = array(
 			'code'				=> $code,
 			'author_id'			=> $this->EE->session->userdata('member_id'),
-			'site_id'			=> $this->EE->input->post('site_id'),
+			'site_id'			=> ($this->EE->input->post('site_id')!=0)?$this->EE->input->post('site_id'):$this->EE->config->item('site_id'),
 			'email' 			=> $this->EE->input->post('email'),
 			'destination_group_id' => $this->EE->input->post('destination_group_id'),
 			'usage_limit'		=> $this->EE->input->post('usage_limit'),
@@ -619,7 +619,7 @@ class Invitations_mcp {
 			$data = array(
 				'code'				=> $this->_generate_code(),
 				'author_id'			=> $this->EE->session->userdata('member_id'),
-				'site_id'			=> $this->EE->input->post('site_id'),
+				'site_id'			=> ($this->EE->input->post('site_id')!=0)?$this->EE->input->post('site_id'):$this->EE->config->item('site_id'),
 				'destination_group_id' => $this->EE->input->post('destination_group_id'),
 				'usage_limit'		=> $this->EE->input->post('usage_limit'),
 	        	'unlimited_usage'	=> ($this->EE->input->post('unlimited_usage')=='y')?'y':'n',
@@ -989,7 +989,7 @@ class Invitations_mcp {
     
     function _string_to_timestamp($human_string, $localized = TRUE)
     {
-        if ($this->EE->config->item('app_version')<260)
+        if (version_compare(APP_VER, '2.6.0', '<'))
         {
             return $this->EE->localize->convert_human_date_to_gmt($human_string, $localized);
         }
